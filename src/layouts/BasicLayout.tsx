@@ -4,21 +4,24 @@
  * https://github.com/ant-design/ant-design-pro-layout
  */
 import type {
-  MenuDataItem,
   BasicLayoutProps as ProLayoutProps,
+  MenuDataItem,
   Settings,
 } from '@ant-design/pro-layout';
 import ProLayout, { DefaultFooter, SettingDrawer } from '@ant-design/pro-layout';
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { Dispatch } from 'umi';
-import { Link, useIntl, connect, history } from 'umi';
+import { connect, history, Link, useIntl } from 'umi';
 import { GithubOutlined } from '@ant-design/icons';
-import { Result, Button } from 'antd';
+import { Button, Result } from 'antd';
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import type { ConnectState } from '@/models/connect';
 import { getMatchMenu } from '@umijs/route-utils';
 import logo from '../assets/logo.svg';
+
+const iconMap = require('@ant-design/icons');
+
 const noMatch = (
   <Result
     status={403}
@@ -47,13 +50,12 @@ export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
  */
 
 const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
-  menuList.map((item) => {
-    const localItem = {
-      ...item,
-      children: item.children ? menuDataRender(item.children) : undefined,
-    };
-    return Authorized.check(item.authority, localItem, null) as MenuDataItem;
-  });
+  menuList.map(({ path, name, icon, children }) => ({
+    path,
+    name,
+    icon: iconMap[icon as string] === undefined ? undefined : iconMap[icon as string].render(),
+    children: children && menuDataRender(children),
+  }));
 
 const defaultFooterDom = (
   <DefaultFooter
@@ -89,12 +91,17 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
     location = {
       pathname: '/',
     },
+    menuData,
+    loading,
   } = props;
   const menuDataRef = useRef<MenuDataItem[]>([]);
   useEffect(() => {
     if (dispatch) {
       dispatch({
         type: 'user/fetchCurrent',
+      });
+      dispatch({
+        type: 'menu/fetchMenu',
       });
     }
   }, []);
@@ -157,11 +164,17 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           );
         }}
         footerRender={() => defaultFooterDom}
-        menuDataRender={menuDataRender}
+        menuDataRender={() => {
+          return menuDataRender(menuData as MenuDataItem[]);
+        }}
+        menu={{
+          loading,
+          locale: false,
+        }}
         rightContentRender={() => <RightContent />}
-        postMenuData={(menuData) => {
-          menuDataRef.current = menuData || [];
-          return menuData || [];
+        postMenuData={(currentMenuData) => {
+          menuDataRef.current = currentMenuData || [];
+          return currentMenuData || [];
         }}
       >
         <Authorized authority={authorized!.authority} noMatch={noMatch}>
@@ -181,7 +194,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   );
 };
 
-export default connect(({ global, settings }: ConnectState) => ({
+export default connect(({ global, settings, menu }: ConnectState) => ({
   collapsed: global.collapsed,
   settings,
+  menuData: menu.menuData,
+  loading: menu.loading,
 }))(BasicLayout);

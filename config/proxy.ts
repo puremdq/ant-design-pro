@@ -12,6 +12,11 @@ export default {
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
+    '/proxy/': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      pathRewrite: { '^/proxy': '' },
+    },
   },
   test: {
     '/api/': {
