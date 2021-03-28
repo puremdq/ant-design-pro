@@ -49,13 +49,26 @@ export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
  * use Authorized check all menu item
  */
 
+// const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
+//   menuList.map(({ path, name, icon, children }) => ({
+//     path,
+//     name,
+//     icon: iconMap[icon as string] === undefined ? undefined : iconMap[icon as string].render(),
+//     children: children && menuDataRender(children),
+//   }));
+
 const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
-  menuList.map(({ path, name, icon, children }) => ({
-    path,
-    name,
-    icon: iconMap[icon as string] === undefined ? undefined : iconMap[icon as string].render(),
-    children: children && menuDataRender(children),
-  }));
+  menuList.map((item) => {
+    const localItem = {
+      ...item,
+      children: item.children ? menuDataRender(item.children) : undefined,
+      icon:
+        iconMap[item.icon as string] === undefined
+          ? undefined
+          : iconMap[item.icon as string].render(),
+    };
+    return Authorized.check(item.authority, localItem, null) as MenuDataItem;
+  });
 
 const defaultFooterDom = (
   <DefaultFooter
