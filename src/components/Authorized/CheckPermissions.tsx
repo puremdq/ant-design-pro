@@ -13,8 +13,8 @@ export type IAuthorityType =
 /**
  * 通用权限检查方法
  * Common check permissions method
- * @param { 权限判定 | Permission judgment } authority
- * @param { 你的权限 | Your permission description } currentAuthority
+ * @param { 需要判定的权限 | Permission judgment } authority
+ * @param { 你拥有权限 | Your permission description } currentAuthority
  * @param { 通过的组件 | Passing components } target
  * @param { 未通过的组件 | no pass components } Exception
  */
