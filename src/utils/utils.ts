@@ -22,3 +22,5 @@ export const isAntDesignProOrDev = (): boolean => {
 };
 
 export const getPageQuery = () => parse(window.location.href.split('?')[1]);
+export const isEmptyString = (str: string): boolean =>
+  str === undefined || str == null || str === '';

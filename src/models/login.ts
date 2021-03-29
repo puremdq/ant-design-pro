@@ -1,5 +1,5 @@
 import { stringify } from 'querystring';
-import type { Reducer, Effect } from 'umi';
+import type { Effect, Reducer } from 'umi';
 import { history } from 'umi';
 
 import { fakeAccountLogin } from '@/services/login';
@@ -62,6 +62,7 @@ const Model: LoginModelType = {
     },
 
     logout() {
+      localStorage.removeItem('antd-pro-authority');
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       if (window.location.pathname !== '/user/login' && !redirect) {

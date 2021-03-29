@@ -1,6 +1,7 @@
 import type { Effect, Reducer } from 'umi';
 
 import { queryCurrent, query as queryUsers } from '@/services/user';
+import { isEmptyString } from '@/utils/utils';
 
 export type CurrentUser = {
   avatar?: string;
@@ -49,6 +50,10 @@ const UserModel: UserModelType = {
       });
     },
     *fetchCurrent(_, { call, put }) {
+      const authority = localStorage.getItem('antd-pro-authority');
+      if (isEmptyString(authority as string)) {
+        window.location.href = '/user/login';
+      }
       const response = yield call(queryCurrent);
       yield put({
         type: 'saveCurrentUser',
