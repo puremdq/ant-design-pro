@@ -1,7 +1,7 @@
 import React from 'react';
 import { CURRENT } from './renderAuthorize';
-// eslint-disable-next-line import/no-cycle
 import PromiseRender from './PromiseRender';
+import { getLoginPage, isLogin } from '@/utils/authority';
 
 export type IAuthorityType =
   | undefined
@@ -24,6 +24,10 @@ const checkPermissions = <T, K>(
   target: T,
   Exception: K,
 ): T | K | React.ReactNode => {
+  if (!isLogin()) {
+    getLoginPage();
+    return null;
+  }
   // 没有判定权限.默认查看所有
   // Retirement authority, return target;
   if (!authority) {

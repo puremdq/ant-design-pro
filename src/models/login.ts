@@ -1,9 +1,8 @@
-import { stringify } from 'querystring';
 import type { Effect, Reducer } from 'umi';
 import { history } from 'umi';
 
 import { fakeAccountLogin } from '@/services/login';
-import { setAuthority } from '@/utils/authority';
+import { setAuthority, logout as authorityLogout } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { message } from 'antd';
 
@@ -62,17 +61,7 @@ const Model: LoginModelType = {
     },
 
     logout() {
-      localStorage.removeItem('antd-pro-authority');
-      const { redirect } = getPageQuery();
-      // Note: There may be security issues, please note
-      if (window.location.pathname !== '/user/login' && !redirect) {
-        history.replace({
-          pathname: '/user/login',
-          search: stringify({
-            redirect: window.location.href,
-          }),
-        });
-      }
+      authorityLogout();
     },
   },
 

@@ -1,9 +1,14 @@
 import { reloadAuthorized } from './Authorized';
+import { getPageQuery, isEmptyString } from '@/utils/utils';
+import { history } from '@@/core/history';
+import { stringify } from 'querystring';
+
+const authorityKey = 'aojiaoo_authority_key';
 
 // use localStorage to store the authority info, which might be sent from server in actual project.
 export function getAuthority(str?: string): string | string[] {
   const authorityString =
-    typeof str === 'undefined' && localStorage ? localStorage.getItem('antd-pro-authority') : str;
+    typeof str === 'undefined' && localStorage ? localStorage.getItem(authorityKey) : str;
   // authorityString could be admin, "admin", ["admin"]
   let authority;
   try {
@@ -26,7 +31,41 @@ export function getAuthority(str?: string): string | string[] {
 
 export function setAuthority(authority: string | string[]): void {
   const proAuthority = typeof authority === 'string' ? [authority] : authority;
-  localStorage.setItem('antd-pro-authority', JSON.stringify(proAuthority));
-  // auto reload
+  localStorage.setItem(authorityKey, JSON.stringify(proAuthority));
+  // auto reload 设置到current
   reloadAuthorized();
+}
+
+export function removeAuthority(): void {
+  localStorage.removeItem(authorityKey);
+  // auto reload 设置到current
+  reloadAuthorized();
+}
+
+export function isLogin(): boolean {
+  return !isEmptyString(localStorage.getItem(authorityKey) as string);
+}
+
+export function getLoginPage(): void {
+  const { redirect } = getPageQuery();
+  // Note: There may be security issues, please note
+  if (window.location.pathname !== '/user/login' && !redirect) {
+    history.replace({
+      pathname: '/user/login',
+      search: stringify({
+        redirect: window.location.href,
+      }),
+    });
+  }
+}
+
+export function checkLogin(): void {
+  if (!isLogin()) {
+    getLoginPage();
+  }
+}
+
+export function logout(): void {
+  removeAuthority();
+  getLoginPage();
 }
